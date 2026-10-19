@@ -10,7 +10,7 @@ A local ECG monitor built with an **ESP32-C3 SuperMini** and a **SparkFun AD8232
 - Local waveform archive with SVG downloads and zoomable previews
 - Electrode status and a built-in placement guide
 
-The device's web interface is currently in German. Relevant control labels are included below to help you find them.
+The web interface supports **English, German, French, and Spanish**. Select a language in the page header; switching languages keeps your measurements, samples, and archive intact. The initial language follows the browser preference, with English as the fallback. Your selection is saved in the settings cookie. German control labels are included below for reference.
 
 ## Screenshots
 
@@ -83,7 +83,7 @@ The ADC uses `analogReadMilliVolts()` with `ADC_11db`. The nominal settings for 
 
 A small grid square nominally represents **0.04 s**, and a large square **0.20 s**. At **0.1 mV per square**, the amplitude divisions match conventional ECG paper, but screen squares have no guaranteed physical size in millimeters. The active scale appears below the waveform and in SVG exports.
 
-View, voltage mode, height, Autozoom, centering, archive length, and heartbeat display options are stored for one year in the local `heartmonitor_settings` cookie. **Pause** stops only live playback; acquisition, status updates, analysis, and archiving continue.
+Language, view, voltage mode, height, Autozoom, centering, archive length, and heartbeat display options are stored for one year in the local `heartmonitor_settings` cookie. **Pause** stops only live playback; acquisition, status updates, analysis, and archiving continue.
 
 ## Contact status and data gaps
 
@@ -122,7 +122,7 @@ Archive segments contain **25, 50, or 100 large squares**, nominally **5, 10, or
 
 **Save segment now** ("Abschnitt jetzt sichern") closes a shorter partial segment. The open page retains up to **20 images**, then removes the oldest. Segments without at least 0.5 seconds of a continuous visible trace are skipped. Contact gaps remain open in exports.
 
-Click a preview to open the enlarged view with **100–400% zoom**, fit-to-width, scrolling, and panning. Each image can be downloaded as an SVG.
+Click a preview to open the enlarged view with **100–400% zoom**, fit-to-width, scrolling, and panning. Each image can be downloaded as an SVG. New SVGs use the language selected when they are created; existing images retain their original labels when you switch languages.
 
 **The archive exists only in the browser page's RAM. Closing or reloading the page discards the images. Download important segments first.** The ESP32 does not record to flash. Continuous archiving is not reliable while the browser page is closed or inactive for an extended period.
 
@@ -173,11 +173,12 @@ node tests/browser_logic.cjs /tmp/heart-packet-fixture.bin
 node tests/heart_analysis.cjs
 ```
 
-Coverage includes binary encoding and browser decoding, ring buffers and cursors, contact release, timing gaps, heart rate estimation, statistics, archive rendering, and settings restoration. Browser interactions are tested using simulated DOM elements. Software tests do not replace testing in the target browser, load testing on the ESP32, or electrical calibration.
+Coverage includes binary encoding and browser decoding, ring buffers and cursors, contact release, timing gaps, heart rate estimation, statistics, archive rendering, and settings restoration. Language tests cover all four translations, browser-language fallback, saved preferences, accessible labels, SVG exports, and preservation of data and pause/offline states while switching. Automated browser interactions use simulated DOM elements. Software tests do not replace testing in the target browser, load testing on the ESP32, or electrical calibration.
 
 ## Project files and references
 
 - [`HeartMonitor/`](HeartMonitor/): Arduino sketch, configuration, packet format, and embedded interface
+- [`HeartMonitor/translations.h`](HeartMonitor/translations.h): Embedded translation dictionary and language selection logic; no external translation service is used
 - [`tests/`](tests/): Protocol, browser logic, and detector tests
 - [`assets/`](assets/): Wiring diagram and electrode illustrations
 - [`assets/THIRD_PARTY.md`](assets/THIRD_PARTY.md): Attribution and CC0 license for the anatomical illustration
