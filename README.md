@@ -12,6 +12,24 @@ A local ECG monitor built with an **ESP32-C3 SuperMini** and a **SparkFun AD8232
 
 The device's web interface is currently in German. Relevant control labels are included below to help you find them.
 
+## Screenshots
+
+These screenshots show the actual web interface with a **synthetic 75 BPM demo signal**, without connected hardware. They do not show a recorded ECG or validate measurement accuracy.
+
+### Live monitor and waveform archive
+
+![Live ECG display, estimated heart rate, contact indicators, and waveform archive](assets/screenshots/live-monitor.png)
+
+### Heartbeat samples
+
+Aligned individual beats, mean, median, and the schematic PQRST reference:
+
+![Heartbeat samples dialog with mean, median, and an illustrative PQRST waveform](assets/screenshots/heartbeat-samples.png)
+
+### Electrode placement guide
+
+![Built-in electrode placement guide showing RA, LA, and RL](assets/screenshots/electrode-guide.png)
+
 ## Safety and limitations
 
 **Use battery power only while electrodes are attached to the body. Do not simultaneously connect USB to a computer, charger, or any other mains-powered device. Disconnect the electrodes from the body before programming.**
