@@ -40,6 +40,18 @@ This setup is not a medically certified measuring device. Detection, voltage dis
 
 You need an ESP32-C3 SuperMini, a SparkFun AD8232 module, a compatible three-electrode cable and electrodes, jumper wires, and a battery supply suitable for your board. Other AD8232 boards may use different gain, pin assignments, or circuitry.
 
+### Hardware photos
+
+The assembled ESP32-C3 and AD8232 with the electrode cable connected:
+
+![ESP32-C3 SuperMini mounted on an AD8232 board with the electrode cable connected](assets/photos/hardware-overview.jpg)
+
+Close-up of the board connection and solder joints:
+
+![Close-up of the ESP32-C3 SuperMini and its connections to the AD8232 board](assets/photos/hardware-detail.jpg)
+
+### Wiring diagram
+
 ![Schematic connection between the ESP32-C3 and AD8232](assets/wiring.svg)
 
 The diagram shows **electrical connections**, not physical pin positions. Check the labels and pinout of your specific board before connecting it.
