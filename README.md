@@ -1,150 +1,152 @@
 # ESP32-C3 + AD8232 Heart Rate Monitor
 
-Ein lokaler EKG-Monitor mit **ESP32-C3 SuperMini** und **SparkFun AD8232 Heart Rate Monitor**. Der ESP32 stellt einen eigenen WLAN-Hotspot bereit; Anzeige, Herzfrequenzschätzung und Kurvenarchiv laufen im Browser. Die Oberfläche benötigt weder Cloud noch externe Webressourcen.
+A local ECG monitor built with an **ESP32-C3 SuperMini** and a **SparkFun AD8232 Heart Rate Monitor**. The ESP32 provides its own Wi-Fi hotspot; visualization, heart rate estimation, and the waveform archive run in the browser. The interface requires no cloud services or external web resources.
 
-- Livekurve mit EKG-Raster, mV-Achse, Autozoom und Zentrierung
-- Fließende Ansicht oder Schreibstrahl von links nach rechts
-- Geschätzte elektrische Herzfrequenz und Trendpfeil
-- Bis zu 100 ausgerichtete Herzschlagsamples mit Mittelwert, Median und Streuungsband
-- Manuelle Zeitmessung an der Mittelkurve
-- Lokales Kurvenarchiv mit SVG-Download und vergrößerbarer Vorschau
-- Elektrodenstatus und integrierte Platzierungshilfe
+- Live waveform with an ECG grid, mV axis, automatic scaling, and centering
+- Scrolling view or a left-to-right sweep
+- Estimated electrical heart rate and a trend arrow
+- Up to 100 aligned heartbeat samples with mean, median, and variability band
+- Manual interval measurements on the mean waveform
+- Local waveform archive with SVG downloads and zoomable previews
+- Electrode status and a built-in placement guide
 
-## Sicherheit und Grenzen
+The device's web interface is currently in German. Relevant control labels are included below to help you find them.
 
-**Bei angelegten Elektroden ausschließlich Batteriebetrieb verwenden. Keine gleichzeitige USB-Verbindung zu Rechner, Ladegerät oder anderen netzbetriebenen Geräten. Zum Programmieren die Elektroden vom Körper trennen.**
+## Safety and limitations
 
-Dieser Aufbau ist kein medizinisch geprüftes Messgerät. Erkennung, Spannungsdarstellung und Zeitmessung sind experimentell und nicht zur Diagnose oder Überwachung medizinischer Zustände bestimmt. Bewegungen, Störungen, Kontaktfehler und abgeschnittene Signale können falsche oder fehlende Anzeigen verursachen.
+**Use battery power only while electrodes are attached to the body. Do not simultaneously connect USB to a computer, charger, or any other mains-powered device. Disconnect the electrodes from the body before programming.**
 
-## Hardware und Verkabelung
+This setup is not a medically certified measuring device. Detection, voltage display, and interval measurements are experimental and are not intended for diagnosing or monitoring medical conditions. Movement, interference, contact faults, and clipped signals can cause incorrect or missing readings.
 
-Benötigt werden ein ESP32-C3 SuperMini, ein SparkFun AD8232-Modul, ein passendes Elektrodenkabel mit drei Elektroden, Verbindungsleitungen und eine für das Board geeignete Batterieversorgung. Bei anderen AD8232-Platinen können Verstärkung, Pinbelegung und Beschaltung abweichen.
+## Hardware and wiring
 
-![Schematische Verbindung zwischen ESP32-C3 und AD8232](assets/wiring.svg)
+You need an ESP32-C3 SuperMini, a SparkFun AD8232 module, a compatible three-electrode cable and electrodes, jumper wires, and a battery supply suitable for your board. Other AD8232 boards may use different gain, pin assignments, or circuitry.
 
-Die Zeichnung zeigt die **elektrischen Verbindungen**, nicht die räumliche Anordnung der Pins. Vor dem Anschluss die Beschriftung und das Pinout des konkreten Boards prüfen.
+![Schematic connection between the ESP32-C3 and AD8232](assets/wiring.svg)
 
-| AD8232 | ESP32-C3 SuperMini | Funktion |
+The diagram shows **electrical connections**, not physical pin positions. Check the labels and pinout of your specific board before connecting it.
+
+| AD8232 | ESP32-C3 SuperMini | Function |
 |---|---|---|
-| 3.3V | 3V3 | Versorgung des Sensors mit 3,3 V |
-| GND | GND | Gemeinsame Masse |
-| OUTPUT | GPIO 4 | Analoger Sensorausgang |
-| LO− | GPIO 3 | Digitaler Kontaktstatus |
-| LO+ | GPIO 1 | Digitaler Kontaktstatus |
-| SDN | Unverbunden | Beim SparkFun-Modul durch vorhandenen Pull-up beschaltet |
+| 3.3V | 3V3 | 3.3 V sensor supply |
+| GND | GND | Common ground |
+| OUTPUT | GPIO 4 | Analog sensor output |
+| LO− | GPIO 3 | Digital lead-off status |
+| LO+ | GPIO 1 | Digital lead-off status |
+| SDN | Leave unconnected | Held high by the SparkFun module's pull-up |
 
-Die Elektroden werden am AD8232 angeschlossen. Maßgeblich sind die Kabelbeschriftungen **RA**, **LA** und **RL**. Die Hilfe in der Oberfläche zeigt RA rot, LA gelb und RL grün; diese Farben sind keine universelle Kabelnorm.
+Connect the electrodes to the AD8232. Follow the cable labels **RA**, **LA**, and **RL**. The interface's placement guide shows RA in red, LA in yellow, and RL in green; these colors are not a universal cable standard.
 
-## Einrichtung
+## Setup
 
-1. In Arduino IDE 2 das Boardpaket **esp32 by Espressif Systems** installieren.
-2. `HeartMonitor/HeartMonitor.ino` öffnen. Alle Header im selben Ordner belassen.
-3. **ESP32C3 Dev Module** auswählen; **USB CDC On Boot: Enabled**, beim üblichen SuperMini **4 MB Flash** und den passenden USB-Port einstellen.
-4. Anschlüsse und Einstellungen in [`HeartMonitor/config.h`](HeartMonitor/config.h) prüfen.
-5. Sketch hochladen. Bei Bedarf BOOT halten, RESET kurz drücken, BOOT loslassen und erneut hochladen.
-6. Für den Messbetrieb USB trennen und auf Batterieversorgung wechseln.
-7. Mit dem WLAN **HeartMonitor**, Standardpasswort **herzkurve123**, verbinden. Das Passwort lässt sich vor dem Kompilieren in `config.h` ändern.
-8. **http://192.168.4.1/** im Browser öffnen. Je nach Betriebssystem öffnet sich zunächst ein Captive Portal. Für verlässliche Cookies und Downloads dieselbe IP in einem normalen Browser verwenden.
+1. Install the **esp32 by Espressif Systems** board package in Arduino IDE 2.
+2. Open `HeartMonitor/HeartMonitor.ino`. Keep all headers in the same folder.
+3. Select **ESP32C3 Dev Module**, set **USB CDC On Boot: Enabled**, choose **4 MB Flash** for a typical SuperMini, and select the correct USB port.
+4. Check the wiring and settings in [`HeartMonitor/config.h`](HeartMonitor/config.h).
+5. Upload the sketch. If necessary, hold BOOT, briefly press RESET, release BOOT, and retry the upload.
+6. Disconnect USB and switch to battery power before taking measurements.
+7. Connect to the **HeartMonitor** Wi-Fi network using the default password **herzkurve123**. You can change the password in `config.h` before compiling.
+8. Open **http://192.168.4.1/** in your browser. Depending on the operating system, a captive portal may open first. Use the same IP address in a regular browser for reliable cookies and downloads.
 
-Der serielle Monitor arbeitet mit **115200 Baud** und meldet unter anderem die Hotspot-Adresse und den Start der Erfassung. Nach einem Firmware-Upload die Browserseite neu laden.
+The serial monitor uses **115200 baud** and reports the hotspot address and acquisition startup. Reload the browser page after uploading firmware.
 
-## Liveanzeige
+## Live display
 
-**Fließende Kurve** bewegt Signal und Raster gleichmäßig nach links. **Schreibstrahl links → rechts** zeichnet bei stationärem Raster eine Seite und beginnt am rechten Rand wieder links. Ein Wiedergabepuffer von etwa 550 ms gleicht kurze WLAN-Verzögerungen aus. Die Anzeige hält an, wenn neue Daten fehlen.
+**Scrolling waveform** ("Fließende Kurve") moves the signal and grid smoothly to the left. **Left-to-right sweep** ("Schreibstrahl links → rechts") draws a page against a stationary grid, then starts again at the left edge. A playback buffer of approximately 550 ms compensates for brief Wi-Fi delays. Playback stops when new data is unavailable.
 
-**Autozoom** und **Zentrieren** sind standardmäßig aktiv und unabhängig schaltbar. Autozoom passt die Höhe an das sichtbare Signal an. Zentrieren verschiebt die Mittellinie; die Bildschirmmitte entspricht dann keiner festen elektrischen Null. Ohne Autozoom gilt die unter „Darstellung einstellen“ gewählte Höhe.
+**Autozoom** and **Center** ("Zentrieren") are enabled by default and can be toggled independently. Autozoom adjusts the vertical scale to the visible signal. Centering shifts the baseline, so the screen center does not represent a fixed electrical zero. With Autozoom disabled, the height selected under **Display settings** ("Darstellung einstellen") applies.
 
-Unter **Spannung** stehen zwei Darstellungen zur Verfügung:
+**Voltage** ("Spannung") offers two display modes:
 
-- **EKG · mV (geschätzt):** `(Modulausgang_mV − Referenz_mV) / Gesamtverstärkung`
-- **Modulausgang · mV:** kalibrierter ADC-Spannungswert am ESP32-Eingang
+- **Estimated ECG · mV** ("EKG · mV (geschätzt)"): `(module_output_mV − reference_mV) / total_gain`
+- **Module output · mV** ("Modulausgang · mV"): the calibrated ADC voltage at the ESP32 input
 
-Der ADC verwendet `analogReadMilliVolts()` mit `ADC_11db`. Für das SparkFun-Modul sind nominell **1100-fache Verstärkung** und **1650 mV Referenz** eingestellt. Die Verstärkung ist frequenzabhängig; diese Umrechnung ersetzt keine Kalibrierung der gesamten Messkette. Der spezifizierte ADC-Messbereich des ESP32-C3 reicht bei dieser Einstellung ungefähr bis **2500 mV**. Darüber liegende Signalanteile können abgeschnitten werden und lassen sich nicht rekonstruieren.
+The ADC uses `analogReadMilliVolts()` with `ADC_11db`. The nominal settings for the SparkFun module are a **gain of 1100** and a **1650 mV reference**. Gain depends on frequency; this conversion does not replace calibration of the complete measurement chain. With this attenuation, the ESP32-C3's specified ADC measurement range extends to approximately **2500 mV**. Signal portions above that level may be clipped and cannot be reconstructed.
 
-Ein kleines Rasterkästchen entspricht nominal **0,04 s**, ein großes **0,20 s**. Bei **0,1 mV/Kästchen** entspricht die Amplitudenaufteilung klassischem EKG-Papier; Bildschirmkästchen besitzen jedoch keine garantierte physische Millimetergröße. Die geltende Skala steht unter der Kurve und in den SVG-Exporten.
+A small grid square nominally represents **0.04 s**, and a large square **0.20 s**. At **0.1 mV per square**, the amplitude divisions match conventional ECG paper, but screen squares have no guaranteed physical size in millimeters. The active scale appears below the waveform and in SVG exports.
 
-Ansicht, Spannung, Höhe, Autozoom, Zentrierung, Archivlänge und die Darstellungsoptionen der Herzschlagsamples werden für ein Jahr im lokalen Cookie `heartmonitor_settings` gespeichert. **Pause** hält nur die Liveanzeige an; Erfassung, Status, Auswertung und Archiv laufen weiter.
+View, voltage mode, height, Autozoom, centering, archive length, and heartbeat display options are stored for one year in the local `heartmonitor_settings` cookie. **Pause** stops only live playback; acquisition, status updates, analysis, and archiving continue.
 
-## Kontaktstatus und Datenlücken
+## Contact status and data gaps
 
-LO− und LO+ werden mit jeder Messung eingelesen. Die Oberfläche bezeichnet GPIO 3 als **Rot**, GPIO 1 als **Grün** und zeigt deren unmittelbaren Zustand als verbunden/nicht verbunden. **Gelb** ist ausschließlich abgeleitet: verbunden, sobald mindestens einer der beiden Eingänge LOW meldet. Es gibt keinen dritten Messeingang. Insbesondere wird der RL-Kontakt nicht separat überwacht; die Anzeigen bestätigen keinen vollständigen Kontakt aller Elektroden.
+LO− and LO+ are read with every measurement. The interface labels GPIO 3 as **Red** ("Rot") and GPIO 1 as **Green** ("Grün"), showing their immediate states as connected/disconnected. **Yellow** ("Gelb") is derived only: it indicates connected whenever at least one of the two inputs reads LOW. There is no third measurement input. In particular, the RL contact is not monitored separately; these indicators do not confirm proper contact of all electrodes.
 
-Beim Start und nach einem bestätigten Kontaktfehler wird die Kurve erst nach insgesamt einer Sekunde gültiger LOW-Messwerte freigegeben. Kurze tolerierte Timinglücken zählen dabei nicht als gültige Messzeit. Ein anhaltender Kontaktfehler sperrt eine bereits freigegebene Anzeige nach einer Sekunde; auch kürzere Fehler bleiben an den betroffenen Messpunkten als Lücken erhalten. Bei Verbindungsverlust wird der Status als veraltet gekennzeichnet.
+At startup and after a confirmed contact fault, the waveform is released only after a total of one second of valid LOW measurements. Brief tolerated timing gaps do not count as valid measurement time. A sustained contact fault blocks an already released display after one second; shorter faults still appear as gaps at the affected measurement points. Connection loss marks the status as stale.
 
-Reine Timinglücken werden getrennt von Kontaktfehlern behandelt. Die Standardtoleranz beträgt **40 ms am Stück** und höchstens **10 % fehlende Punkte** im betrachteten Abschnitt. Kurze Timinglücken dürfen intern für die Zeiterkennung überbrückt werden; Rohdaten bleiben unverändert. In Livekurve, Samples und SVG-Archiven verbindet eine schwarze Linie mit 90 % Deckkraft die benachbarten gemessenen Punkte. Diese Gerade ist eine Zeichenhilfe, keine rekonstruierte Messung. Kontaktlücken, längere Lücken und offene Enden bleiben unverbunden.
+Timing gaps are handled separately from contact faults. The default tolerance is **40 ms per continuous gap**, with no more than **10% missing points** in the evaluated segment. Brief timing gaps may be bridged internally for beat timing analysis; raw data remains unchanged. In the live waveform, heartbeat samples, and SVG archives, a black line at 90% opacity connects adjacent measured points across short timing gaps. This straight line is a visual aid, not a reconstructed measurement. Contact gaps, longer gaps, and gaps without measured points on both sides remain open.
 
-## Herzfrequenz und Herzschlagsamples
+## Heart rate and heartbeat samples
 
-Die angezeigte Herzfrequenz ist eine **Schätzung der elektrischen Schlagfrequenz**, nicht zwingend des tastbaren Pulses. Der eigene, nicht klinisch validierte Detektor erkennt positive oder negative Spitzen und berechnet `60 / Median(der letzten bis zu vier Schlagabstände in Sekunden)`. Standardmäßig sind mindestens **zwei Sekunden verwertbares Signal** und **drei erkannte Spitzen** erforderlich. Bei langsamem Herzschlag kann die Wartezeit länger sein.
+The displayed heart rate is an **estimate of the electrical beat rate**, which does not necessarily equal the palpable pulse. The custom detector is not clinically validated. It detects positive or negative peaks and calculates `60 / median(of the last up to four beat intervals in seconds)`. By default, at least **two seconds of usable signal** and **three detected peaks** are required. At lower heart rates, the wait may be longer.
 
-Der technische Auswertebereich ist **35–210 /min**. Ungeeignete Signale, Kontaktfehler, längere oder häufige Grenzwertüberschreitungen und unplausible Schlagabstände führen zur Anzeige **—**. Kurze Grenzwertüberschreitungen bis 80 ms werden innerhalb der Plausibilitätsgrenzen toleriert, ohne ihre Amplitude zu korrigieren. Netzwerkfehler und länger als drei Sekunden ausbleibende neue Werte blenden die Schätzung aus.
+The technical analysis range is **35–210 beats/min**. Unsuitable signals, contact faults, prolonged or frequent voltage limit violations, and implausible beat intervals produce **—**. Brief limit violations of up to 80 ms are tolerated within the plausibility limits, without correcting their amplitude. Network errors and a lack of new values for more than three seconds hide the estimate.
 
-Der Trendpfeil vergleicht die jüngsten drei Schlagabstände mit der vorherigen Dreiergruppe. **↑ / ↓** erscheint bei einer Änderung um mehr als 2 /min oder 3 % (der größere Schwellwert gilt), sonst **→**. Ohne ausreichende Daten erscheint **—**.
+The trend arrow compares the latest three beat intervals with the preceding group of three. **↑ / ↓** indicates a change greater than 2 beats/min or 3%, whichever threshold is larger; otherwise **→** is shown. Insufficient data produces **—**.
 
-**Herzschlagsamples** öffnet ein separates Fenster. Bis zu 100 Schläge werden an der erkannten Spitze ausgerichtet: **−250 bis +450 ms**, **701 Punkte im Abstand von 1 ms**, Spitze bei Index 250. Jeder Schlag erhält eine eigene Grundlinienkorrektur, aber keine Höhennormalisierung oder zeitliche Dehnung.
+**Heartbeat samples** ("Herzschlagsamples") opens a separate dialog. Up to 100 beats are aligned at the detected peak: **−250 to +450 ms**, **701 points at 1 ms spacing**, with the peak at index 250. Each beat receives its own baseline correction, without amplitude normalization or time stretching.
 
-- Türkis gestrichelt: Einzelkurven
-- Dunkel durchgezogen: Mittelwert
-- Violett durchgezogen: punktweiser Median
-- Band um den Mittelwert: ±1 Stichprobenstandardabweichung
+- Dashed turquoise: individual waveforms
+- Solid dark line: mean
+- Solid purple line: pointwise median
+- Band around the mean: ±1 sample standard deviation
 
-Mittelwert und Median sind unabhängig schaltbar und anfangs aktiv. Alle gesammelten Samples tragen zur Statistik bei, einschließlich abgeschnittener Kurven. Fehlende Punkte bleiben leer und werden punktweise aus der Berechnung ausgelassen. Kontaktlücken verwerfen ein Sample; Timinglücken sind innerhalb der konfigurierten Grenzen erlaubt. Die Streuung beschreibt Kurvenformen, keine RR-basierte HRV-Auswertung.
+Mean and median can be toggled independently and are initially enabled. All collected samples contribute to the statistics, including clipped waveforms. Missing points remain empty and are excluded from calculations at the corresponding time position. Contact gaps cause a sample to be rejected; timing gaps are allowed within the configured limits. The variability describes waveform shapes, not RR-based heart rate variability (HRV).
 
-**Glätten (Anzeige)** ist anfangs aus und verändert ausschließlich angezeigte Samplekopien. Der Bereich ±40 ms um die Spitze bleibt unverändert; Mittelwert, Median und Streuungsband beziehen sich bei aktiver Glättung auf die geglätteten Kopien. Die Rohdaten, Livekurve, Archive und BPM-Erkennung bleiben unverändert.
+**Display smoothing** ("Glätten (Anzeige)") is initially disabled and affects only displayed copies of the samples. The region within ±40 ms of the peak remains unchanged. When smoothing is enabled, the mean, median, and variability band use the smoothed copies. Raw data, the live waveform, archives, and BPM detection remain unchanged.
 
-**Beispielkurve** blendet eine synthetische PQRST-Kurve mit illustrativen Abschnitten ein. **Zeitabschnitte an der Mittelkurve messen** bietet sechs geordnete Marken für P-, QRS- und T-Anfang/-Ende, per Ziehen oder Zahleneingabe mit 1-ms-Raster. Daraus entstehen P-Dauer, PR-Intervall, PR-Strecke, QRS-Dauer, ST-Strecke, T-Dauer und QT-Intervall. Die Marken werden manuell gesetzt; es gibt keine automatische Wellenklassifikation. Die Mittelkurve aktualisiert sich mit neuen Samples, daher müssen die Marken geprüft werden.
+**Example waveform** ("Beispielkurve") overlays a synthetic PQRST curve with illustrative sections. **Measure intervals on the mean waveform** ("Zeitabschnitte an der Mittelkurve messen") provides six ordered markers for the starts and ends of P, QRS, and T. Drag them or enter values numerically on a 1 ms grid. These positions determine P duration, PR interval, PR segment, QRS duration, ST segment, T duration, and QT interval. Markers are placed manually; there is no automatic wave classification. The mean waveform updates as new samples arrive, so marker placement needs to be checked.
 
-Die Sammlung läuft bei geschlossenem Fenster weiter. **Samples leeren** beginnt neu. Beim Neuladen der Seite gehen Samples und Messmarken verloren.
+Collection continues while the dialog is closed. **Clear samples** ("Samples leeren") starts a new collection. Reloading the page discards samples and measurement markers.
 
-## Kurvenarchiv
+## Waveform archive
 
-Archivabschnitte umfassen **25, 50 oder 100 große Kästchen**, entsprechend nominal **5, 10 oder 20 Sekunden**. Längere Abschnitte erscheinen mit fünf Sekunden pro Zeile. Jeder Abschnitt übernimmt seine Anzeigeeinstellungen bei Beginn; Autozoom und Zentrierung werden beim Abschluss anhand seiner Werte berechnet. Die SVGs enthalten Raster, Spannungsskala und Browser-Uhrzeit.
+Archive segments contain **25, 50, or 100 large squares**, nominally **5, 10, or 20 seconds**. Longer segments use five seconds per row. Each segment captures its display settings when it starts; Autozoom and centering are calculated from its values when it finishes. SVGs include the grid, voltage scale, and browser time.
 
-**Abschnitt jetzt sichern** schließt einen kürzeren Teilabschnitt ab. Es bleiben höchstens **20 Grafiken** in der geöffneten Seite; danach wird die älteste entfernt. Abschnitte ohne mindestens 0,5 Sekunden zusammenhängenden sichtbaren Kurvenzug werden übersprungen. Kontaktlücken bleiben auch im Export offen.
+**Save segment now** ("Abschnitt jetzt sichern") closes a shorter partial segment. The open page retains up to **20 images**, then removes the oldest. Segments without at least 0.5 seconds of a continuous visible trace are skipped. Contact gaps remain open in exports.
 
-Ein Klick auf eine Vorschau öffnet die Großansicht mit **100–400 % Zoom**, Einpassen, Scrollen und Verschieben. Jede Grafik lässt sich als SVG herunterladen.
+Click a preview to open the enlarged view with **100–400% zoom**, fit-to-width, scrolling, and panning. Each image can be downloaded as an SVG.
 
-**Das Archiv liegt nur im RAM der Browserseite. Beim Schließen oder Neuladen gehen die Grafiken verloren. Wichtige Abschnitte vorher herunterladen.** Der ESP32 zeichnet nicht im Flash auf. Bei geschlossener oder länger inaktiver Browserseite gibt es keine verlässliche fortlaufende Archivierung.
+**The archive exists only in the browser page's RAM. Closing or reloading the page discards the images. Download important segments first.** The ESP32 does not record to flash. Continuous archiving is not reliable while the browser page is closed or inactive for an extended period.
 
-## Konfiguration und Erfassung
+## Configuration and acquisition
 
-Die zentralen Einstellungen stehen in [`HeartMonitor/config.h`](HeartMonitor/config.h):
+The main settings are in [`HeartMonitor/config.h`](HeartMonitor/config.h):
 
-| Einstellung | Standard | Bedeutung |
+| Setting | Default | Meaning |
 |---|---|---|
-| `SAMPLE_INTERVAL_US` | `1000` | Sollintervall 1000 µs, entsprechend 1000 Samples/s |
-| `SAMPLE_COUNT` | automatisch `5000` | Fünf Sekunden Firmware-Ringpuffer |
-| `SENSOR_PIN` | `4` | Analogeingang |
-| `LEAD_OFF_MINUS_PIN` / `LEAD_OFF_PLUS_PIN` | `3` / `1` | Kontakteingänge |
-| `ECG_GAIN` / `ECG_REFERENCE_MV` | `1100` / `1650` | Umrechnung der Spannungsanzeige |
-| `HEART_MIN_SIGNAL_SECONDS` | `2` | Mindestdauer für die Herzfrequenzschätzung |
-| `HEART_MIN_BEATS` | `3` | Mindestzahl erkannter Spitzen |
-| `HEART_MAX_TIMING_GAP_MS` | `40` | Maximale tolerierte einzelne Timinglücke |
-| `HEART_MAX_TIMING_GAP_PERCENT` | `10` | Maximaler Anteil fehlender Timingpunkte |
-| `WIFI_TX_POWER` | `WIFI_POWER_8_5dBm` | Maximale WLAN-Sendeleistung |
-| `AP_SSID` / `AP_PASSWORD` | `HeartMonitor` / `herzkurve123` | Hotspot-Zugang |
+| `SAMPLE_INTERVAL_US` | `1000` | Target interval of 1000 µs, equivalent to 1000 samples/s |
+| `SAMPLE_COUNT` | Automatically `5000` | Five-second firmware ring buffer |
+| `SENSOR_PIN` | `4` | Analog input |
+| `LEAD_OFF_MINUS_PIN` / `LEAD_OFF_PLUS_PIN` | `3` / `1` | Contact status inputs |
+| `ECG_GAIN` / `ECG_REFERENCE_MV` | `1100` / `1650` | Voltage display conversion |
+| `HEART_MIN_SIGNAL_SECONDS` | `2` | Minimum duration for heart rate estimation |
+| `HEART_MIN_BEATS` | `3` | Minimum number of detected peaks |
+| `HEART_MAX_TIMING_GAP_MS` | `40` | Maximum tolerated individual timing gap |
+| `HEART_MAX_TIMING_GAP_PERCENT` | `10` | Maximum percentage of missing timing points |
+| `WIFI_TX_POWER` | `WIFI_POWER_8_5dBm` | Maximum Wi-Fi transmit power |
+| `AP_SSID` / `AP_PASSWORD` | `HeartMonitor` / `herzkurve123` | Hotspot credentials |
 
-Ein periodischer ESP-Timer benachrichtigt eine eigene Messtask. Aufgelaufene Termine werden als fehlende Zeitschritte markiert; die Task misst einmal den aktuellen Wert und gibt regelmäßig Rechenzeit für Webserver und System frei. Der Browser hält 30 Sekunden Verlauf.
+A periodic ESP timer notifies a dedicated acquisition task. Missed timer events are recorded as missing time slots; the task takes one current measurement and regularly yields CPU time to the web server and system. The browser retains 30 seconds of history.
 
-**Die Zeitachse verwendet das Sollintervall, keine individuellen ADC-Zeitstempel.** Die eingestellten 1000 Samples/s garantieren keine lückenlose Erfassung. Tatsächliche Messabstände und Ausfälle unter WLAN-Last müssen am Gerät geprüft werden. `/api/samples` enthält dafür `timing.missed`, `timing.minIntervalUs` und `timing.maxIntervalUs`.
+**The time axis uses the target interval, not individual ADC timestamps.** Setting 1000 samples/s does not guarantee uninterrupted acquisition. Actual measurement intervals and losses under Wi-Fi load need to be checked on the device. `/api/samples` provides `timing.missed`, `timing.minIntervalUs`, and `timing.maxIntervalUs` for this purpose.
 
-## Schnittstellen
+## Interfaces
 
-| Pfad | Inhalt |
+| Path | Content |
 |---|---|
-| `/` | Vollständig lokale Weboberfläche |
-| `/api/samples.bin?session=<Boot-ID>&after=<Sequenz>` | Inkrementelle Binärpakete für die Liveanzeige |
-| `/api/samples` | JSON mit Werten, Kontaktstatus, Skalierung und Timingdiagnosen |
+| `/` | Fully local web interface |
+| `/api/samples.bin?session=<boot-ID>&after=<sequence>` | Incremental binary packets for the live display |
+| `/api/samples` | JSON containing values, contact status, scaling, and timing diagnostics |
 
-Die Webseite ruft nominal alle **100 ms** neue Werte ab; bei Rückstand folgen weitere Abrufe ohne zusätzliche Pause. Ein Paket enthält höchstens **128 Werte**. Sitzungskennung und Sequenznummern erkennen Neustarts, vermeiden Duplikate und markieren abgelaufene Cursor.
+The page nominally polls for new values every **100 ms**; when catching up, it makes additional requests without an extra pause. Each packet contains up to **128 values**. Session identifiers and sequence numbers detect restarts, prevent duplicates, and flag expired cursors.
 
-Das **HMS2-Format** verwendet Little Endian, einen 32-Byte-Header und zwei Byte pro Sample. Der Header enthält Magic, Sitzung, erste/nächste/neuste Sequenz, Sollintervall, Verstärkung, Referenz, Anzahl und Flags. Im Samplewort stehen der Ausgangswert in Bit 0–13 sowie LO−/LO+ in Bit 14/15. `0x3fff` ohne Kontaktbits kennzeichnet eine reine Timinglücke. Details stehen in [`HeartMonitor/sample_packet.h`](HeartMonitor/sample_packet.h).
+The **HMS2 format** uses little-endian encoding, a 32-byte header, and two bytes per sample. The header contains the magic identifier, session, first/next/latest sequence numbers, target interval, gain, reference, count, and flags. In each sample word, bits 0–13 hold the output voltage and bits 14/15 hold LO−/LO+. `0x3fff` with no contact bits set marks a timing gap. See [`HeartMonitor/sample_packet.h`](HeartMonitor/sample_packet.h) for details.
 
-MQTT und WLAN-Client-Betrieb sind nicht implementiert. Der Hotspot ist nicht mit dem Heimnetz verbunden.
+MQTT and Wi-Fi station mode are not implemented. The hotspot is not connected to the home network.
 
 ## Tests
 
-Die Tests verwenden simulierte Signale und ausschließlich synthetische Testdaten. Benötigt werden Node.js und ein C++-Compiler:
+Tests use simulated signals and exclusively synthetic test data. Node.js and a C++ compiler are required:
 
 ```sh
 c++ -std=c++11 -Wall -Wextra -pedantic tests/sample_packet_test.cpp -o /tmp/heart-packet-test
@@ -153,20 +155,20 @@ node tests/browser_logic.cjs /tmp/heart-packet-fixture.bin
 node tests/heart_analysis.cjs
 ```
 
-Geprüft werden unter anderem Binärkodierung und Browserdekodierung, Ringpuffer und Cursor, Kontaktfreigabe, Timinglücken, Herzfrequenzschätzung, Statistik, Archivdarstellung und Einstellungswiederherstellung. Browserinteraktionen werden mit simulierten DOM-Elementen geprüft. Die Softwaretests ersetzen keinen Test im Zielbrowser, keinen Lasttest am ESP32 und keine elektrische Kalibrierung.
+Coverage includes binary encoding and browser decoding, ring buffers and cursors, contact release, timing gaps, heart rate estimation, statistics, archive rendering, and settings restoration. Browser interactions are tested using simulated DOM elements. Software tests do not replace testing in the target browser, load testing on the ESP32, or electrical calibration.
 
-## Projektdateien und Quellen
+## Project files and references
 
-- [`HeartMonitor/`](HeartMonitor/): Arduino-Sketch, Konfiguration, Paketformat und eingebettete Oberfläche
-- [`tests/`](tests/): Protokoll-, Browserlogik- und Detektortests
-- [`assets/`](assets/): Anschlusszeichnung und Elektrodenillustrationen
-- [`assets/THIRD_PARTY.md`](assets/THIRD_PARTY.md): Herkunft und CC0-Lizenz der anatomischen Vorlage
+- [`HeartMonitor/`](HeartMonitor/): Arduino sketch, configuration, packet format, and embedded interface
+- [`tests/`](tests/): Protocol, browser logic, and detector tests
+- [`assets/`](assets/): Wiring diagram and electrode illustrations
+- [`assets/THIRD_PARTY.md`](assets/THIRD_PARTY.md): Attribution and CC0 license for the anatomical illustration
 
-Technische Grundlagen:
+Technical references:
 
 - [SparkFun AD8232 Hookup Guide](https://learn.sparkfun.com/tutorials/ad8232-heart-rate-monitor-hookup-guide)
-- [SparkFun AD8232 Schaltplan](https://cdn.sparkfun.com/datasheets/Sensors/Biometric/AD8232_Heart_Rate_Monitor_v10.pdf)
-- [AD8232-Datenblatt](https://www.analog.com/media/en/technical-documentation/data-sheets/AD8232.pdf)
+- [SparkFun AD8232 schematic](https://cdn.sparkfun.com/datasheets/Sensors/Biometric/AD8232_Heart_Rate_Monitor_v10.pdf)
+- [AD8232 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/AD8232.pdf)
 - [Espressif Arduino ADC API](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/adc.html)
 
-Die Quellen beschreiben Hardware und Grundlagen; der implementierte Detektor ist kein klinisch validiertes Referenzverfahren.
+These sources describe the hardware and underlying principles; the implemented detector is not a clinically validated reference method.
