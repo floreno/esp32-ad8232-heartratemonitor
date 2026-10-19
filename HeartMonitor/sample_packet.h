@@ -6,14 +6,14 @@ namespace SamplePacket {
 constexpr size_t HEADER_BYTES = 32;
 constexpr size_t MAX_VALUES = 128;
 constexpr uint32_t MAGIC = 0x32534d48; // Bytes: HMS2
-// Statusbit 0: LO-; Statusbit 1: LO+. In den oberen zwei Samplebits.
+// Status bit 0: LO-; status bit 1: LO+. Stored in the two upper sample bits.
 constexpr uint16_t VALUE_MASK = 0x3fff;
-// Reservierter, physikalisch unmöglicher mV-Wert: ausgelassener Messzeitpunkt.
+// Reserved, physically impossible mV value: missing measurement slot.
 constexpr uint16_t MISSING_SAMPLE = VALUE_MASK;
 inline uint16_t packSample(uint16_t millivolts, uint8_t leadStatus) {
   return (millivolts & VALUE_MASK) | ((leadStatus & 3) << 14);
 }
-// Aufrufer schützt den Ring vor parallelen Zugriffen.
+// The caller protects the ring buffer from concurrent access.
 inline void insertMissing(uint16_t* ring, size_t capacity, size_t& writeIndex,
                           size_t& available, uint32_t& total, uint32_t& session, uint32_t count) {
   if (!count) return;

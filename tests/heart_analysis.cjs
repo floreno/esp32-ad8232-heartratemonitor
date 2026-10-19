@@ -1,6 +1,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
 const source=require('./read_web_page.cjs')();
 const context={console};vm.createContext(context);
+vm.runInContext(source.slice(source.indexOf('const TRANSLATIONS='),source.indexOf('const archiveViewer='))+"\ncurrentLanguage='de';",context);
 vm.runInContext(source.slice(source.indexOf('function median('),source.indexOf('const heart=')),context);
 vm.runInContext(`
 function synthetic(peaks,seconds=30,polarity=1,rate=100){

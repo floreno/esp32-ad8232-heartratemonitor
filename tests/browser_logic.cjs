@@ -11,7 +11,7 @@ const page=require('./read_web_page.cjs')();
 assert.match(page, /id="auto-height"[^>]*checked/);
 assert.match(page, /id="center"[^>]*checked/);
 assert.match(page, /<dialog id="electrode-help" aria-labelledby="electrode-help-title"/);
-assert.match(page, /aria-label="Hilfe zur Elektrodenplatzierung" aria-haspopup="dialog"/);
+assert.match(page, /aria-label="Electrode placement help" data-i18n-aria-label="s10" aria-haspopup="dialog"/);
 const commonsBody=fs.readFileSync(require('path').join(__dirname,'../assets/human-body-front.svg'),'utf8').match(/<svg[^>]*>([\s\S]*)<\/svg>/)[1];
 assert(page.includes(commonsBody),'Original Commons body must be embedded once');
 for(const name of ['limbs','torso']){
@@ -29,7 +29,7 @@ const positions=[],drawnText=[];
 const drawing=new Proxy({}, {get:(target,name)=>name==='fillText'?((text,x,y)=>drawnText.push({text,x,y})):name==='moveTo'||name==='lineTo'?((x,y)=>{if(!Number.isFinite(x)||!Number.isFinite(y))throw Error('Invalid canvas coordinate');positions.push([x,y]);}):()=>{}});
 get('beat-overlay').clientWidth=900;get('beat-overlay').clientHeight=280;get('beat-overlay').getContext=()=>drawing;
 get('plot').clientWidth=900;get('plot').clientHeight=320;get('plot').getContext=()=>drawing;
-const context={recording:require('./fixtures/synthetic-75bpm.json').values,positions,drawnText,requestAnimationFrame(){},document:{getElementById:get,createElement:element},window:{addEventListener(){}},URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},Blob,Date,console};
+const context={recording:require('./fixtures/synthetic-75bpm.json').values,positions,drawnText,requestAnimationFrame(){},navigator:{languages:['de-DE']},document:{documentElement:{},querySelectorAll:()=>[],getElementById:get,createElement:element},window:{addEventListener(){}},URL:{createObjectURL:()=> 'blob:test',revokeObjectURL(){}},Blob,Date,console};
 vm.createContext(context);
 vm.runInContext(page.match(/<script>([\s\S]*?)<\/script>/)[1].replace(/poll\(\);\s*requestAnimationFrame\(animate\);\s*$/,''),context);
 vm.runInContext(`
@@ -480,6 +480,47 @@ console.log('PASS: automatic height, constant signals, full ADC range, empty inp
 console.log('PASS: scroll and sweep rendering with finite coordinates, including sweep wrap');
 console.log('PASS: smooth frame advance, no packet jumps, live deduplication, no extrapolation, pause, gap recovery');
 console.log('PASS: first sample, deduplication, segment boundaries, interruption handling, 20-image limit, multi-row SVG');
+`,context);
+
+// Language changes must preserve measurements, archived images, and UI state.
+vm.runInContext(`
+assertLanguagePreferences();
+function assertLanguagePreferences(){
+ if(preferredLanguage(['it-IT','fr-CA'])!=='fr'||preferredLanguage(['ja-JP'])!=='en')throw Error('Browser language fallback failed');
+ for(const [key,row] of Object.entries(TRANSLATIONS)){
+  if(row.length!==4||row.some(value=>typeof value!=='string'||!value))throw Error('Incomplete translation '+key);
+  const placeholders=value=>[...value.matchAll(/\\{(\\w+)\\}/g)].map(match=>match[1]).sort().join(',');
+  if(row.some(value=>placeholders(value)!==placeholders(row[0])))throw Error('Translation placeholders differ '+key);
+ }
+ const snapshot=JSON.stringify({live:live.values,beats:heart.beats,total:heart.totalBeats,pending,cursor:transport.after,urls:archiveEntries.map(entry=>entry.url)});
+ const translationsNode={textContent:'',getAttribute:()=> 's25'};
+ const accessibleNode={title:'',getAttribute:()=> 's11',setAttribute(name,value){this[name]=value}};
+ document.querySelectorAll=selector=>selector==='[data-i18n]'?[translationsNode]:selector==='[data-i18n-title]'?[accessibleNode]:[];
+ paused=true;networkFailed=false;
+ showContactStatus({newest:1,leadStatus:3,contactFault:3,contactReady:false});hideHeartRate('checkContact');
+ for(const [language,title,contact,exportText] of [
+  ['en','Heartbeat samples','Red: disconnected','nominal gain 1100'],
+  ['de','Herzschlagsamples','Rot: nicht verbunden','Verstärkung 1100'],
+  ['fr','Échantillons de battements','Rouge : déconnecté','gain nominal 1100'],
+  ['es','Muestras de latidos','Rojo: desconectado','ganancia nominal 1100']
+ ]){
+  setLanguage(language);
+  if(document.documentElement.lang!==language||translationsNode.textContent!==title||document.getElementById('lead-minus').textContent!==contact)throw Error('Language display failed: '+language);
+  if(accessibleNode.title!==t('s11'))throw Error('Accessible title not translated');
+  if(document.getElementById('pause').textContent!==t('resume')||statusEl.textContent!==t('paused'))throw Error('Switch lost pause state');
+  if(document.getElementById('pulse-note').textContent!==t('checkContact'))throw Error('Hidden heart rate state not translated');
+  const exported=archiveSvg([1650,1700],{interval:1000,units:110,baseline:1650,factor:1100,reference:1650,ecg:true,autoHeight:false,autoCenter:false,started:new Date()},false);
+  if(!exported.includes(exportText)||/undefined|NaN/.test(exported))throw Error('Localized SVG export failed: '+language);
+  if(JSON.stringify({live:live.values,beats:heart.beats,total:heart.totalBeats,pending,cursor:transport.after,urls:archiveEntries.map(entry=>entry.url)})!==snapshot)throw Error('Language change modified measurement state');
+ }
+ currentLanguage='en';restoreSettings();
+ if(currentLanguage!=='es')throw Error('Saved language not restored');
+ networkFailed=true;setLanguage('fr');
+ if(document.getElementById('contact-status').textContent!==t('staleContact')||document.getElementById('lead-yellow').textContent!==t('yellowUnknown'))throw Error('Offline state lost on language change');
+ setLanguage('unsupported');if(currentLanguage!=='en')throw Error('Unsupported language fallback failed');
+ currentLanguage='de';paused=false;networkFailed=false;document.querySelectorAll=()=>[];
+}
+console.log('PASS: four languages, browser fallback, translated accessibility and SVG exports, saved preference, offline/pause preservation and unchanged measurement data');
 `,context);
 
 if(process.argv[2]){
