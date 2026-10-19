@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650" role="img" aria-labelledby="title desc">
+<title id="title">ESP32-C3 und AD8232: Anschlussübersicht</title>
+<desc id="desc">3V3 an 3.3V, GND an GND, GPIO 4 an OUTPUT, GPIO 3 an LO minus, GPIO 1 an LO plus. SDN am SparkFun-Modul unverbunden. Schematische Darstellung ohne räumliche Pinzuordnung.</desc>
+<rect width="1100" height="650" rx="20" fill="#f4f7fb"/>
+<g font-family="Arial, sans-serif" fill="#172b40">
+<text x="50" y="53" font-size="28" font-weight="700">ESP32-C3 + AD8232</text>
+<text x="50" y="83" font-size="16" fill="#52667c">Anschlussübersicht · Pinpositionen schematisch, nicht maßstabsgetreu</text>
+<rect x="50" y="120" width="300" height="360" rx="18" fill="#e1eee9" stroke="#36715b" stroke-width="2"/>
+<text x="75" y="160" font-size="23" font-weight="700">ESP32-C3 SuperMini</text>
+<text x="75" y="187" font-size="15" fill="#52667c">Pinbeschriftung am Board prüfen</text>
+<rect x="750" y="120" width="300" height="360" rx="18" fill="#e4edf8" stroke="#3c668f" stroke-width="2"/>
+<text x="775" y="160" font-size="23" font-weight="700">AD8232</text>
+<text x="775" y="187" font-size="15" fill="#52667c">SparkFun Heart Rate Monitor</text>
+<g font-size="20" font-weight="700">
+<text x="325" y="239" text-anchor="end">3V3</text><text x="775" y="239">3.3V</text>
+<text x="325" y="289" text-anchor="end">GND</text><text x="775" y="289">GND</text>
+<text x="325" y="339" text-anchor="end">GPIO 4</text><text x="775" y="339">OUTPUT</text>
+<text x="325" y="389" text-anchor="end">GPIO 3</text><text x="775" y="389">LO−</text>
+<text x="325" y="439" text-anchor="end">GPIO 1</text><text x="775" y="439">LO+</text>
+</g>
+<g fill="none" stroke-width="4">
+<path d="M350 232H750" stroke="#c34747"/><path d="M350 282H750" stroke="#263b50"/>
+<path d="M350 332H750" stroke="#247d80"/><path d="M350 382H750" stroke="#8162b0"/><path d="M350 432H750" stroke="#ad701e"/>
+</g>
+<g font-size="14" text-anchor="middle" fill="#52667c">
+<text x="550" y="221">Versorgung · 3,3 V</text><text x="550" y="271">Gemeinsame Masse</text>
+<text x="550" y="321">Analoges Signal → ESP32</text><text x="550" y="371">Kontaktstatus → ESP32</text><text x="550" y="421">Kontaktstatus → ESP32</text>
+</g>
+<text x="750" y="510" font-size="16">SDN: offen lassen (SparkFun-Pull-up).</text>
+<text x="750" y="536" font-size="16">Elektrodenkabel am AD8232 anschließen.</text>
+<rect x="50" y="566" width="1000" height="57" rx="10" fill="#fff0db"/>
+<text x="70" y="590" font-size="16" font-weight="700">Bei Elektroden am Körper: ausschließlich Batteriebetrieb.</text>
+<text x="70" y="612" font-size="15">Keine gleichzeitige USB-Verbindung zu Rechner, Ladegerät oder anderen netzbetriebenen Geräten.</text>
+</g>
+</svg>
